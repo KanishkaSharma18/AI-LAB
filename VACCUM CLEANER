@@ -1,0 +1,44 @@
+env = {
+    "A": input("Is Room A dirty? (yes/no): ").strip().lower().replace("yes","Dirty").replace("no","Clean"),
+    "B": input("Is Room B dirty? (yes/no): ").strip().lower().replace("yes","Dirty").replace("no","Clean")
+}
+location = input("Where is the agent? (A/B): ").strip().upper()
+
+# SIMPLE REFLEX AGENT 
+def simple_reflex(env, loc):
+    if env[loc] == "Dirty":
+        print(f"{loc} is dirty → CLEAN")
+        env[loc] = "Clean"
+    else:
+        loc = "A" if loc=="B" else "B"
+        print(f"{loc} is clean → Move to {loc}")
+    return loc
+
+#  GOAL-BASED AGENT 
+def goal_based_agent(state):
+    while True:
+        if state["A"] == "Dirty":
+            print("A is dirty → CLEAN")
+            state["A"] = "Clean"
+        elif state["B"] == "Dirty":
+            print("B is dirty → CLEAN")
+            state["B"] = "Clean"
+        else:
+            print("Goal Reached: All rooms Clean")
+            print("State:", state)
+            break   # <--- stop after reaching goal
+
+print("\nInitial:", env, "Agent at", location)
+
+print("\n--- Simple Reflex Agent ---")
+for _ in range(4):
+    location = simple_reflex(env, location)
+    print("State:", env)
+
+print("\n--- Goal-Based Agent ---")
+for _ in range(4):
+    location = goal_based(env, location)
+    print("State:", env)
+
+print("Name: Kanishka Sharma")
+print("USN: 1BM23CS138")
