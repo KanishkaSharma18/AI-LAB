@@ -1,0 +1,78 @@
+import random, time
+
+LINES = [(0,1,2),(3,4,5),(6,7,8),
+         (0,3,6),(1,4,7),(2,5,8),
+         (0,4,8),(2,4,6)]
+
+def winner(b):
+    for a,b_,c in LINES:
+        if b[a]!=" " and b[a]==b[b_]==b[c]:
+            return b[a]
+    return None
+
+def moves(b): 
+    return [i for i,v in enumerate(b) if v==" "]
+
+def agent(b, me, opp):
+    # Try to win
+    for i in moves(b):
+        c=b[:]; c[i]=me
+        if winner(c)==me: return i
+    # Try to block
+    for i in moves(b):
+        c=b[:]; c[i]=opp
+        if winner(c)==opp: return i
+    # Take center
+    if 4 in moves(b): return 4
+    # Take corners
+    for i in [0,2,6,8]:
+        if i in moves(b): return i
+    # Else random
+    return random.choice(moves(b))
+
+def play():
+    b=[" "]*9
+    turn="X"   # Agent is X, Human is O
+    print("You are O. Enter positions 1-9 as follows:")
+    print("1 | 2 | 3")
+    print("4 | 5 | 6")
+    print("7 | 8 | 9\n")
+
+    while True:
+        if turn=="X":
+            i=agent(b,"X","O")      # AI move
+            print("Agent plays:", i+1)
+        else:
+            while True:
+                try:
+                    user=int(input("Your move (1-9): "))-1
+                    if user in moves(b): 
+                        i=user; break
+                    else:
+                        print("Invalid move, try again.")
+                except ValueError:
+                    print("Enter a number between 1 and 9.")
+
+        b[i]=turn
+        print_board(b)
+        
+        w=winner(b)
+        if w: 
+            print(f"{w} wins!")
+            break
+        if not moves(b): 
+            print("Draw")
+            break
+        
+        turn="O" if turn=="X" else "X"
+
+def print_board(b):
+    for i in range(0,9,3):
+        print(" | ".join(b[i:i+3]))
+        if i<6: print("-"*5)
+    print()
+
+if __name__=="__main__":
+    play()
+print("Name: Kanishka Sharma")
+print("USN: 1BM23CS138")
