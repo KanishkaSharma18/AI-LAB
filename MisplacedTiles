@@ -1,0 +1,65 @@
+import heapq
+
+# Heuristic: Number of misplaced tiles
+def misplaced_tiles(state, goal):
+    count = 0
+    for i in range(3):
+        for j in range(3):
+            if state[i][j] != 0 and state[i][j] != goal[i][j]:
+                count += 1
+    return count
+
+# Generate neighbors (possible moves of blank space)
+def get_neighbors(state):
+    neighbors = []
+    x, y = [(ix, iy) for ix, row in enumerate(state) for iy, i in enumerate(row) if i == 0][0]
+    moves = [(-1,0), (1,0), (0,-1), (0,1)]  # up, down, left, right
+    
+    for dx, dy in moves:
+        nx, ny = x + dx, y + dy
+        if 0 <= nx < 3 and 0 <= ny < 3:
+            new_state = [list(row) for row in state]
+            new_state[x][y], new_state[nx][ny] = new_state[nx][ny], new_state[x][y]
+            neighbors.append(new_state)
+    return neighbors
+
+# Convert list to tuple (hashable for visited set)
+def state_to_tuple(state):
+    return tuple(tuple(row) for row in state)
+
+# A* with Misplaced Tiles (showing only f, g, h expansions)
+def a_star_misplaced(initial, goal):
+    open_list = []
+    h0 = misplaced_tiles(initial, goal)
+    heapq.heappush(open_list, (h0, 0, h0, initial))  # (f, g, h, state)
+    visited = set()
+
+    while open_list:
+        f, g, h, state = heapq.heappop(open_list)
+
+        # Show current state with f, g, h values
+        print(f"\nExpanding node: g={g}, h={h}, f={f}")
+        for row in state:
+            print(row)
+
+        if state == goal:
+            print("\n✅ Goal Reached!")
+            return
+
+        visited.add(state_to_tuple(state))
+        for neighbor in get_neighbors(state):
+            if state_to_tuple(neighbor) not in visited:
+                g_new = g + 1
+                h_new = misplaced_tiles(neighbor, goal)
+                f_new = g_new + h_new
+                heapq.heappush(open_list, (f_new, g_new, h_new, neighbor))
+
+# ============ Main ============
+print("Enter Initial State (3x3, use 0 for blank):")
+initial = [list(map(int, input().split())) for _ in range(3)]
+
+print("Enter Goal State (3x3, use 0 for blank):")
+goal = [list(map(int, input().split())) for _ in range(3)]
+
+a_star_misplaced(initial, goal)
+  
