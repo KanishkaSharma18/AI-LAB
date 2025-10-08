@@ -1,0 +1,105 @@
+import random
+
+def print_board(board):
+    n = len(board)
+    for row in range(n):
+        line = ""
+        for col in range(n):
+            line += " Q " if board[col] == row else " . "
+        print(line)
+    print()
+
+
+def calculate_heuristic(board):
+    """Count the number of pairs of queens attacking each other."""
+    h = 0
+    n = len(board)
+    for i in range(n):
+        for j in range(i + 1, n):
+            if board[i] == board[j] or abs(board[i] - board[j]) == abs(i - j):
+                h += 1
+    return h
+
+
+def get_best_neighbor(board):
+    """Generate all neighbors and return the one with the lowest heuristic."""
+    n = len(board)
+    best_board = list(board)
+    best_h = calculate_heuristic(board)
+
+    for col in range(n):
+        original_row = board[col]
+        for row in range(n):
+            if row == original_row:
+                continue
+            neighbor = list(board)
+            neighbor[col] = row
+            h = calculate_heuristic(neighbor)
+            if h < best_h:
+                best_h = h
+                best_board = neighbor
+    return best_board, best_h
+
+
+def hill_climbing(board, random_restart=True):
+    n = len(board)
+    current_h = calculate_heuristic(board)
+    steps = 0
+    restart_count = 0
+
+    print(f"\nInitial board (h = {current_h}):")
+    print_board(board)
+
+    while True:
+        steps += 1
+        neighbor, neighbor_h = get_best_neighbor(board)
+
+        print(f"Step {steps}: Current h = {current_h}, Best neighbor h = {neighbor_h}")
+        print("Current Board:")
+        print_board(board)
+        print("Best Neighbor Board:")
+        print_board(neighbor)
+
+        # Found solution
+        if neighbor_h == 0:
+            print(f"✅ Solution found in {steps} steps (after {restart_count} restarts)!")
+            print_board(neighbor)
+            return neighbor
+
+        # Local minimum — restart if allowed
+        if neighbor_h >= current_h:
+            print("⚠️ Local minimum reached!")
+            if random_restart:
+                restart_count += 1
+                print(f"Restarting... (Restart #{restart_count})\n")
+                board = [random.randint(0, n - 1) for _ in range(n)]
+                current_h = calculate_heuristic(board)
+                continue
+            else:
+                print("No better neighbors found. Ending search.")
+                return None
+
+        board, current_h = neighbor, neighbor_h
+
+
+if __name__ == "__main__":
+    n = int(input("Enter the number of queens (N): "))
+    if n < 4:
+        print("N must be at least 4 for a valid solution.")
+    else:
+        print("\nEnter the row position (0 to N-1) of each queen, one per column.")
+        board = []
+        for i in range(n):
+            while True:
+                try:
+                    pos = int(input(f"Column {i}: "))
+                    if 0 <= pos < n:
+                        board.append(pos)
+                        break
+                    else:
+                        print(f"⚠️ Invalid! Enter a number between 0 and {n-1}.")
+                except ValueError:
+                    print("⚠️ Please enter a valid integer.")
+
+        hill_climbing(board, random_restart=True)
+2
