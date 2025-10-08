@@ -1,0 +1,91 @@
+import math
+import random
+import time
+
+def print_board(board):
+    n = len(board)
+    for row in range(n):
+        line = ""
+        for col in range(n):
+            line += " Q " if board[col] == row else " . "
+        print(line)
+    print()
+
+
+def calculate_heuristic(board):
+    """Count the number of attacking pairs of queens."""
+    h = 0
+    n = len(board)
+    for i in range(n):
+        for j in range(i + 1, n):
+            if board[i] == board[j] or abs(board[i] - board[j]) == abs(i - j):
+                h += 1
+    return h
+
+
+def get_random_neighbor(board):
+    """Generate a random neighbor by moving one queen."""
+    n = len(board)
+    neighbor = list(board)
+    col = random.randint(0, n - 1)
+    row = random.randint(0, n - 1)
+    neighbor[col] = row
+    return neighbor
+
+
+def simulated_annealing(board, initial_temp=100, cooling_rate=0.99, stop_temp=0.1):
+    current = list(board)
+    current_h = calculate_heuristic(current)
+    T = initial_temp
+    steps = 0
+
+    print(f"\nInitial board (h = {current_h}):")
+    print_board(current)
+
+    while T > stop_temp and current_h != 0:
+        steps += 1
+        neighbor = get_random_neighbor(current)
+        neighbor_h = calculate_heuristic(neighbor)
+        delta_h = neighbor_h - current_h
+
+        # Accept move if better, or with probability exp(-Δh / T)
+        if delta_h < 0 or random.uniform(0, 1) < math.exp(-delta_h / T):
+            current = neighbor
+            current_h = neighbor_h
+
+        print(f"Step {steps}: Temperature = {T:.3f}, h = {current_h}")
+
+        T *= cooling_rate  # Cool down gradually
+        time.sleep(0.05)   # small delay for readability
+
+    print("\nFinal board:")
+    print_board(current)
+
+    if current_h == 0:
+        print(f"✅ Solution found in {steps} steps!")
+    else:
+        print("⚠️ Could not find a perfect solution. Try again or adjust parameters.")
+
+    return current
+
+
+if __name__ == "__main__":
+    n = int(input("Enter the number of queens (N): "))
+    if n < 4:
+        print("N must be at least 4.")
+    else:
+        print("\nEnter the row position (0 to N-1) of each queen, one per column.")
+        board = []
+        for i in range(n):
+            while True:
+                try:
+                    pos = int(input(f"Column {i}: "))
+                    if 0 <= pos < n:
+                        board.append(pos)
+                        break
+                    else:
+                        print(f"⚠️ Enter a number between 0 and {n-1}.")
+                except ValueError:
+                    print("⚠️ Please enter a valid integer.")
+
+        simulated_annealing(board, initial_temp=100, cooling_rate=0.98, stop_temp=0.001)
