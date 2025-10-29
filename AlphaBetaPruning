@@ -1,0 +1,72 @@
+import math
+
+# --------------------------------------------
+# Define the game tree structure
+# --------------------------------------------
+game_tree = {
+    'A': ['B', 'C'],
+    'B': ['D', 'E'],
+    'C': ['F', 'G'],
+    'D': ['L1', 'L2'],
+    'E': ['L3', 'L4'],
+    'F': ['L5', 'L6'],
+    'G': ['L7', 'L8'],
+    'L1': 10,
+    'L2': 9,
+    'L3': 14,
+    'L4': 18,
+    'L5': 5,
+    'L6': 4,
+    'L7': 50,
+    'L8': 3
+}
+
+# --------------------------------------------
+# Pretty print the game tree as ASCII art
+# --------------------------------------------
+def print_tree():
+    print("\nGame Tree Structure:\n")
+    print("                A (MAX)")
+    print("              /        \\")
+    print("           B (MIN)       C (MIN)")
+    print("          /     \\        /     \\")
+    print("       D (MAX)  E (MAX)  F (MAX)  G (MAX)")
+    print("      /   \\     /   \\     /   \\     /   \\")
+    print("    10    9   14   18   5    4   50    3")
+    print("\n--------------------------------------------\n")
+
+# --------------------------------------------
+# Alpha-Beta Pruning (Concise Version)
+# --------------------------------------------
+def alphabeta(node, alpha, beta, maximizing_player):
+    if isinstance(game_tree[node], int):
+        return game_tree[node]
+
+    if maximizing_player:
+        value = -math.inf
+        for child in game_tree[node]:
+            value = max(value, alphabeta(child, alpha, beta, False))
+            alpha = max(alpha, value)
+            if alpha >= beta:
+                break
+        return value
+    else:
+        value = math.inf
+        for child in game_tree[node]:
+            value = min(value, alphabeta(child, alpha, beta, True))
+            beta = min(beta, value)
+            if beta <= alpha:
+                break
+        return value
+
+# --------------------------------------------
+# Run the algorithm
+# --------------------------------------------
+print_tree()
+print("Starting Alpha-Beta Pruning...\n")
+
+best_value = alphabeta('A', -math.inf, math.inf, True)
+
+print("--------------------------------------------")
+print(f"✅ Best achievable value at root (A): {best_value}")
+print("--------------------------------------------")
