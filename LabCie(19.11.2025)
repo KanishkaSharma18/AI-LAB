@@ -1,0 +1,93 @@
+
+def iddfs(grid, start, goal):
+    directions = [(-1,0),(1,0),(0,-1),(0,1)]  
+
+    def valid(x, y):
+        return (
+            0 <= x < len(grid) and
+            0 <= y < len(grid[0]) and
+            grid[x][y] != 1
+        )
+
+    def dls(node, goal, limit, visited, path):
+        if node == goal:
+            return path
+
+        if limit == 0:
+            return None
+
+        x, y = node
+
+        for dx, dy in directions:
+            nx, ny = x + dx, y + dy
+
+            if valid(nx, ny) and (nx, ny) not in visited:
+                visited.add((nx, ny))
+                result = dls((nx, ny), goal, limit - 1, visited, path + [(nx, ny)])
+                if result:
+                    return result
+                visited.remove((nx, ny))
+
+        return None
+
+    depth = 0
+    max_depth = len(grid) * len(grid[0])
+
+    while depth <= max_depth:
+        visited = {start}
+        path = dls(start, goal, depth, visited, [start])
+        if path:
+            return path
+        depth += 1
+
+    return None
+
+if __name__ == "__main__":
+
+    rows = int(input("Enter number of rows: "))
+    cols = int(input("Enter number of columns: "))
+
+    print("\nEnter the grid row by row:")
+    print("Use 0 = free, 1 = obstacle, S = start, G = goal\n")
+
+    grid = []
+    start = None
+    goal = None
+
+    for i in range(rows):
+        while True:
+            row = input(f"Row {i}: ").strip().split()
+            if len(row) == cols:
+                processed_row = []
+                for j, cell in enumerate(row):
+                    if cell == "S":
+                        start = (i, j)
+                        processed_row.append(0)
+                    elif cell == "G":
+                        goal = (i, j)
+                        processed_row.append(0)
+                    elif cell in ("0", "1"):
+                        processed_row.append(int(cell))
+                    else:
+                        print("Invalid cell! Use only 0, 1, S, G.")
+                        processed_row = None
+                        break
+
+                if processed_row is not None:
+                    grid.append(processed_row)
+                    break
+            else:
+                print(f"Row must contain exactly {cols} items.")
+
+    if start is None or goal is None:
+        print("\nError: Grid must contain exactly one S and one G.")
+        exit()
+
+    path = iddfs(grid, start, goal)
+
+    print("\n---------------------------------")
+    if path:
+        print("Path found:")
+        print(path)
+    else:
+        print("No path exists.")
